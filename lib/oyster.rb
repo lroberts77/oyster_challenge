@@ -10,12 +10,14 @@ class Oyster_card
     end
 
     def top_up(amount)
-      maximum_balance = MAXIMUM_BALANCE
-      fail "Maximum balance of #{maximum_balance} exceeded" if amount + balance > MAXIMUM_BALANCE
+      fail "Maximum balance of #{MAXIMUM_BALANCE} exceeded" if (amount + @balance) > MAXIMUM_BALANCE
       @balance += amount
     end
 
     def deduct(amount)
-      minimum_balance = MINIMUM_BALANCE
-      
+      #minimum_balance = MINIMUM_BALANCE
+      fail "Minimum balance of #{MINIMUM_BALANCE} exceeded" if (@balance - amount) < MINIMUM_BALANCE
+      @balance -= amount
+    end
+
 end
