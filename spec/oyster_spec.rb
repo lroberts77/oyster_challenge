@@ -24,8 +24,8 @@ describe Oyster_card do
 
     it "raises an error when topup exceeds limit" do
       maximum_balance = Oyster_card::MAXIMUM_BALANCE
-      subject.top_up(maximum_balance)
-      expect { subject.top_up 1 }.to raise_error "Maximum balance of #{maximum_balance} exceeded"
+      subject.top_up(90)
+      expect { subject.top_up 15 }.to raise_error "Maximum balance of #{maximum_balance} exceeded"
     end
 
     it "raises an error when deduction balance exceeds zero" do
@@ -33,5 +33,28 @@ describe Oyster_card do
         # subject.top_up(minimun_balance)
         subject.top_up(10)
         expect {subject.deduct 15}.to raise_error "Minimum balance of #{Oyster_card::MINIMUM_BALANCE} exceeded"
+    end
+
+    describe "#touch_in" do
+
+      it "checks if card has been used to #touch_in" do
+        subject.touch_in
+        expect(subject.in_journey?).to eq true
+      end
+    end
+
+    describe "#touch_out" do
+
+      it "checks if card has been used to #touch_out" do
+        subject.touch_out
+        expect(subject.in_journey?).to eq false
+      end
+    end
+
+    describe "#in_journey" do
+
+      it "checks to make sure the card is not initially in_journey?" do
+      expect(subject.in_journey?).to eq false
+      end
     end
 end
