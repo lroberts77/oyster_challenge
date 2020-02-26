@@ -2,6 +2,8 @@ require'./lib/oyster.rb'
 
 describe Oyster_card do
 
+  let(:station) {:station}
+
     #As a customer I want money on my card
     it "oyster_card has a balance of zero" do
       expect(subject.balance).to eq(0)
@@ -28,17 +30,19 @@ describe Oyster_card do
       expect { subject.top_up 15 }.to raise_error "Maximum balance of #{maximum_balance} exceeded"
     end
 
-    it "raises an error when deduction balance exceeds zero" do
+    #it "raises an error when deduction balance exceeds zero" do
         # minimun_balance = Oyster_card::MINIMUM_BALANCE
-        # subject.top_up(minimun_balance)
-        subject.top_up(10)
-        expect {subject.deduct 15}.to raise_error "Minimum balance of #{Oyster_card::MINIMUM_BALANCE} exceeded"
-    end
+        # # subject.top_up(minimun_balance)
+        it "raises an error when trying to #touch_in when balance is < 1" do
+          subject.instance_variable_set(:@balance, 0)
+          expect { subject.touch_in(station) }.to raise_error "Top_up more than £#{Oyster_card::MINIMUM_BALANCE} to use card for travel"
+        end
 
     describe "#touch_in" do
 
       it "checks if card has been used to #touch_in" do
-        subject.touch_in
+        subject.instance_variable_set(:@balance, 10)
+        subject.touch_in(station)
         expect(subject.in_journey?).to eq true
       end
     end
@@ -46,10 +50,24 @@ describe Oyster_card do
     describe "#touch_out" do
 
       it "checks if card has been used to #touch_out" do
-        subject.touch_out
+        subject.instance_variable_set(:@balance, 10)
+        subject.touch_out(station)
         expect(subject.in_journey?).to eq false
       end
     end
+
+      it "when card is #touch_out deduct amount from balance" do
+        subject.top_up(10)
+        subject.touch_in(station)
+        expect { subject.touch_out(station) }.to change {subject.balance}.by(-Oyster_card::MINIMUM_BALANCE)
+      end
+
+      it "stores the entry station" do
+        subject.top_up(10)
+        subject.touch_in(station)
+        expect(subject.entry_station).to eq (station)
+      end
+
 
     describe "#in_journey" do
 
