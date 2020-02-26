@@ -68,6 +68,17 @@ describe Oyster_card do
         expect(subject.entry_station).to eq (station)
       end
 
+      it "show the card has no journeys by default" do
+        expect(subject.history).to eq []
+      end
+
+      it "checks that touching in and out creates a journey" do
+        subject.top_up(10)
+        subject.touch_in(station)
+        subject.touch_out(station)
+        expect(subject.history).to eq [{ in: station, exit: station }]
+      end
+
 
     describe "#in_journey" do
 
