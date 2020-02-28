@@ -1,42 +1,51 @@
-class Oyster_card
+require_relative 'journey'
+class Oystercard
 
-    MAXIMUM_BALANCE = 90
-    MINIMUM_BALANCE = 1
+  attr_reader :balance, :entry_station, :current_trip, :journeys
 
-    attr_reader :balance, :status, :entry_station, :history
+MAXIMUM_BALANCE = 90
+MINIMUM_BALANCE = 1
+STANDARD_CHARGE = 1
 
-    def initialize
-       @balance = 0
-       @status = false
-       @entry_station = entry_station
-       @history = []
+  def initialize
+    @balance = 0
+    @current_trip = nil
+    @journeys = []
+  end
+
+  def top_up(amount)
+    fail "Balance cannot exceed #{MAXIMUM_BALANCE}" if @balance + amount > MAXIMUM_BALANCE
+    @balance += amount
+  end
+
+  def touch_in(entry_station)
+    raise "Top up mare than £#{Oystercard::MINIMUM_BALANCE} to use card for travel" if balance < MINIMUM_BALANCE
+    if @current_trip != nil
+      @journeys << (@current_trip)
+      deduct(@current_trip.calculate_fare)
     end
-
-    def top_up(amount)
-      fail "Maximum balance of #{MAXIMUM_BALANCE} exceeded" if (amount + @balance) > MAXIMUM_BALANCE
-      @balance += amount
-    end
-
-    def deduct(amount)
-      #minimum_balance = MINIMUM_BALANCE
-      @balance -= amount
-    end
-
-    def touch_in(station)
-      raise "Top_up more than £#{Oyster_card::MINIMUM_BALANCE} to use card for travel" if balance < MINIMUM_BALANCE
-      @status = true
-      @entry_station = station
-    end
-
-    def touch_out(station)
-      deduct(MINIMUM_BALANCE)
-      @status
-      @history << { in: entry_station, exit: station }
-      @entry_station = nil
+    @current_trip = Journey.new
+    @current_trip.start_journey(entry_station)
+  end
+  
+  def touch_out(exit_station)
+    if @current_trip == nil
+      @current_trip = Journey.new
       
-    end
 
-    def in_journey?
-      !!entry_station
     end
+    @current_trip.finish_journey(exit_station)
+    deduct(@current_trip.calculate_fare)
+    @journeys << (@current_trip)
+    @current_trip = nil
+  end
+
+  private
+  def deduct(amount)
+    @balance -= amount
+  end
+  # def limited_balance
+  #   @balance < MINIMUM_BALANCE
+  # end
 end
+
